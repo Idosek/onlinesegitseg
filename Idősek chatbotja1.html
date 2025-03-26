@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idősek Weboldala</title>
+    <style>
+        /* Alap háttér beállítások */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-image: url('kép.jpg'); /* Háttérkép */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Weboldal tartalom */
+        .content {
+            background-color: #d3d3d3;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #48b44c;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: white;
+            background-color: #0b8d45;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Képek és üzletek */
+        .logo {
+            width: 150px;
+            display: block;
+            margin: auto;
+        }
+
+        .shop-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            display: block;
+            margin: 10px auto;
+        }
+
+        .shop-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .shop-item {
+            text-align: center;
+        }
+
+        /* Kezdetben rejtett elemek */
+        #shopOptions, #tescoContainer, #chatbot {
+            display: none;
+        }
+
+        /* Tesco weboldal beágyazás */
+        #tescoContainer {
+            width: 100%;
+            height: 600px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Chatbot */
+        #chatbot {
+            margin-top: 20px;
+            padding: 10px;
+            background: #eee;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        #chatbot p {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        /* Látássérült kérdés elrejtése, de a funkció megmarad */
+        #initialQuestion {
+            display: none;
+        }
+    </style>
+
+    <script>
+        // Üzletválasztás megjelenítése
+        function showShops() {
+            document.getElementById('mainOptions').style.display = 'none';
+            document.getElementById('shopOptions').style.display = 'block';
+        }
+
+        // Tesco oldal beágyazása és sütik elutasítása
+        function openTesco() {
+            document.getElementById('shopOptions').style.display = 'none';
+            document.getElementById('tescoContainer').style.display = 'block';
+            document.getElementById('chatbot').style.display = 'block';
+            document.getElementById('tescoFrame').src = 'https://bevasarlas.tesco.hu/groceries/hu-HU/';
+
+            setTimeout(() => {
+                rejectCookies();
+            }, 3000);
+        }
+
+        // Sütiket elutasító gomb automatikus kattintása
+        function rejectCookies() {
+            let iframe = document.getElementById('tescoFrame');
+            let tries = 0;
+
+            let interval = setInterval(() => {
+                tries++;
+                let frameDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!frameDoc) return;
+
+                let rejectButton = [...frameDoc.getElementsByTagName("button")].find(btn => btn.innerText.includes("Összes elutasítása"));
+
+                if (rejectButton) {
+                    rejectButton.click();
+                    clearInterval(interval);
+                    console.log("Sütik elutasítva.");
+                }
+
+                if (tries > 10) {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+
+        // Chatbot segítség
+        function chatbotHelp(step) {
+            let chatbot = document.getElementById('chatbot');
+            let helpText = document.createElement('p');
+
+            if (step === 1) {
+                helpText.innerText = "1️⃣ Először jelentkezzen be vagy regisztráljon a Tesco weboldalon!";
+            } else if (step === 2) {
+                helpText.innerText = "2️⃣ Keresse meg a kívánt termékeket a keresősáv segítségével!";
+            } else if (step === 3) {
+                helpText.innerText = "3️⃣ Tegye a kiválasztott termékeket a kosárba!";
+            } else if (step === 4) {
+                helpText.innerText = "4️⃣ Válassza ki a kiszállítás időpontját és fejezze be a vásárlást!";
+            }
+
+            chatbot.appendChild(helpText);
+        }
+    </script>
+
+</head>
+<body>
+    <div class="content">
+        <div id="introText">
+            <img src="Kép5.jpg" alt="Logó" class="logo">
+            <h2>Üdvözöljük a weboldalon!</h2>
+        </div>
+
+        <!-- Menüpontok -->
+        <div id="mainOptions">
+            <p>Válasszon a következő lehetőségek közül:</p>
+            <button>Számla kifizetése</button>
+            <button>Orvosi időpont foglalás</button>
+            <button onclick="showShops();">Bevásárlás</button>
+        </div>
+
+        <!-- Üzletválasztás -->
+        <div id="shopOptions">
+            <h1>Válassz egy üzletet</h1>
+            <div class="shop-container">
+                <div class="shop-item">
+                    <img src="tesco-logo.png" alt="Tesco" class="shop-logo">
+                    <button onclick="openTesco();">Tesco</button>
+                </div>
+                <div class="shop-item">
+                    <img src="auchan-logo.png" alt="Auchan" class="shop-logo">
+                    <button onclick="window.open('https://online.auchan.hu', '_blank');">Auchan</button>
+                </div>
+                <div class="shop-item">
+                    <img src="spar-logo.png" alt="Spar" class="shop-logo">
+                    <button onclick="window.open('https://www.spar.hu/onlineshop', '_blank');">Spar</button>
+                </div>
+                <div class="shop-item">
+                    <img src="lidl-logo.png" alt="Lidl" class="shop-logo">
+                    <button onclick="window.open('https://www.lidl.hu', '_blank');">Lidl</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tesco weboldal beágyazva -->
+        <div id="tescoContainer">
+            <iframe id="tescoFrame"></iframe>
+        </div>
+
+        <!-- Chatbot -->
+        <div id="chatbot">
+            <h2>🛒 Online vásárlási segítség</h2>
+            <button onclick="chatbotHelp(1)">👤 Bejelentkezés</button>
+        </div>
+    </div>
+
+    <script src="bot1.js"></script>
+</body>
+</html>
